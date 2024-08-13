@@ -221,6 +221,7 @@ class FileSystem extends Component {
     }
 
     uploadFile = (file, dir, callback) => {
+        console.log("uploadFile")
         const {name, size} = file;
         let url = `${server}/${this.state.storageType}/${this.state.storageId}/upload?X-Auth-Token=${getToken()}&dir=${dir}`
 
@@ -264,6 +265,9 @@ class FileSystem extends Component {
             }
         }
 
+        let lastLoadedBytes = 0;
+        let lastTime = Date.now();
+
         xhr.upload.addEventListener('progress', (event) => {
             if (event.lengthComputable) {
                 let description = (
@@ -291,10 +295,27 @@ class FileSystem extends Component {
                 if (prevPercent === percent) {
                     return;
                 }
+
+                // 速率
+                const currentTime = Date.now();
+                const duration = (currentTime - lastTime) / 1000; // 转换为秒
+                const loaded = event.loaded - lastLoadedBytes;
+
+                const speedBps = loaded / duration; // 字节/秒
+                const speedKBps = speedBps / 1024; // KB/秒
+                const speedMBps = speedKBps / 1024; // MB/秒
+
+                // 更新上一次的加载字节数和时间
+                lastLoadedBytes = event.loaded;
+                lastTime = currentTime;
+
                 description = (
                     <React.Fragment>
                         <div>{name}</div>
-                        <div>{renderSize(event.loaded)} / {renderSize(size)}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <div>{renderSize(event.loaded)} / {renderSize(size)}</div>
+                            <div>{speedMBps.toFixed(2)} MB/s</div>
+                        </div>
                         <Progress percent={percent}/>
                     </React.Fragment>
                 );
@@ -314,6 +335,7 @@ class FileSystem extends Component {
             }
 
         }, false)
+
         xhr.onreadystatechange = (data) => {
             if (xhr.readyState !== 4) {
                 let responseText = data.currentTarget.responseText;
@@ -327,7 +349,7 @@ class FileSystem extends Component {
                     let description = (
                         <React.Fragment>
                             <div>{name}</div>
-                            <div>{renderSize(uploadToTarget)}/{renderSize(size)}</div>
+                            <div>{renderSize(uploadToTarget)} / {renderSize(size)}</div>
                             <Progress percent={percent}/>
                         </React.Fragment>
                     );
