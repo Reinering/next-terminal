@@ -197,7 +197,7 @@ class FileSystem extends Component {
         }
     }
 
-    handleUploadFile = () => {
+    handleUploadFile = (event) => {
         let files = window.document.getElementById('file-upload').files;
         let uploadEndCount = 0;
         const increaseUploadEndCount = () => {
@@ -215,6 +215,9 @@ class FileSystem extends Component {
                 }
             });
         }
+
+        // 上传完成后，清除input的值
+        event.target.value = null;
     }
 
     uploadFile = (file, dir, callback) => {
