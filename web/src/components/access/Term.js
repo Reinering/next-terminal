@@ -9,8 +9,9 @@ import Message from "./Message";
 import qs from "qs";
 import {wsServer} from "../../common/env";
 import Draggable from "react-draggable";
-import {CodeOutlined, FolderOutlined, LineChartOutlined} from "@ant-design/icons";
+import {CodeOutlined, FolderOutlined, LineChartOutlined, MacCommandOutlined} from "@ant-design/icons";
 import FileSystem from "../devops/FileSystem";
+import CommandBar from "../devops/CommandBar";
 import "xterm/css/xterm.css"
 import Stats from "./Stats";
 import {debounce} from "../../utils/fun";
@@ -38,6 +39,7 @@ const Term = () => {
 
     let [fileSystemVisible, setFileSystemVisible] = useState(false);
     let [statsVisible, setStatsVisible] = useState(false);
+    let [cmdBarVisible, setCmdBarVisible] = useState(false);
     let [enterBtnZIndex, setEnterBtnZIndex] = useState(999);
     let [queryInterval, setQueryInterval] = useState(5000);
 
@@ -89,7 +91,11 @@ const Term = () => {
     }
 
     const onWindowResize = () => {
-        setBox({width: window.innerWidth, height: window.innerHeight});
+        if (cmdBarVisible) {
+            setBox({width: window.innerWidth, height: window.innerHeight - 200});
+        } else {
+            setBox({width: window.innerWidth, height: window.innerHeight});
+        }
     };
 
     const init = async (assetId) => {
@@ -295,6 +301,21 @@ const Term = () => {
                 </Affix>
             </Draggable>
 
+            <Draggable>
+                <Affix style={{position: 'absolute', top: 100, right: 50, zIndex: enterBtnZIndex}}>
+                    <Button icon={<MacCommandOutlined/>} onClick={() => {
+                        setCmdBarVisible(!cmdBarVisible);
+                        setEnterBtnZIndex(999);
+
+                        if (!cmdBarVisible) {
+                            setBox({width: window.innerWidth, height: window.innerHeight - 200});
+                        } else {
+                            setBox({width: window.innerWidth, height: window.innerHeight});
+                        }
+                    }}/>
+                </Affix>
+            </Draggable>
+
             <Drawer
                 title={'会话详情'}
                 placement="right"
@@ -350,6 +371,10 @@ const Term = () => {
             >
                 <Stats sessionId={session['id']} visible={statsVisible} queryInterval={queryInterval}/>
             </Drawer>
+
+            {cmdBarVisible &&
+                <CommandBar send={writeCommand} style={{height: "200px"}}/>
+            }
         </div>
     );
 };
