@@ -138,15 +138,15 @@ const Term = () => {
             }
         }
 
-        document.body.onpaste = (event) => {
-            event.preventDefault();
-            if (session['paste'] === '0') {
-                message.warn('禁止粘贴')
-                return false;
-            } else {
-                return true;
-            }
-        }
+        // document.body.onpaste = (event) => {
+        //     event.preventDefault();
+        //     if (session['paste'] === '0') {
+        //         message.warn('禁止粘贴')
+        //         return false;
+        //     } else {
+        //         return true;
+        //     }
+        // }
 
         let token = getToken();
         let params = {

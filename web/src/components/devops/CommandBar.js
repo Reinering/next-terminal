@@ -5,7 +5,8 @@ import {
     message,
     Modal,
     Select,
-    Space
+    Space,
+    Typography
 } from "antd";
 const { TextArea } = Input;
 import {useSearchParams} from "react-router-dom";
@@ -410,13 +411,17 @@ function CommandBar(props) {
             { /* 右键菜单样式 */}
             {option && (
                 <Modal title="Add Button"  open={addButtonVisible} onOk={handleAddButtonOk} onCancel={handleAddButtonCancel}>
-                    <Input addonBefore="Label" value={label} maxLength={16} onChange={e => {setLabel(e.target.value)}}/>
-                    <Input addonBefore="Send String" autoSize value={sendStr} onChange={e => {setSendStr(e.target.value)}}/>
+                    <Typography.Title level={5}>Label</Typography.Title>
+                    <Input value={label} maxLength={16} onChange={e => {console.log("mark", e); setLabel(e.target.value)}}/>
+                    <Typography.Title level={5}>Send String</Typography.Title>
+                    <TextArea autoSize value={sendStr} onChange={e => {setSendStr(e.target.value)}}/>
                 </Modal>
             )}
             <Modal title="Edit Button" open={editButtonVisible} onOk={handleEditButtonOk} onCancel={handleEditButtonCancel}>
-                <Input addonBefore="Label" value={label1} maxLength={16} onChange={e => {setLabel1(e.target.value)}}/>
-                <Input addonBefore="Send String" autoSize value={sendStr1} onChange={e => {setSendStr1(e.target.value)}}/>
+                <Typography.Title level={5}>Label</Typography.Title>
+                <Input value={label1} maxLength={16} onChange={e => {setLabel1(e.target.value)}}/>
+                <Typography.Title level={5}>Send String</Typography.Title>
+                <TextArea autoSize value={sendStr1} onChange={e => {setSendStr1(e.target.value)}}/>
             </Modal>
             <Modal title="Delete Button" open={delButtonVisible} onOk={handleDelButtonOk} onCancel={handleDelButtonCancel}>
                 <p>Are you sure to delete this?</p>
