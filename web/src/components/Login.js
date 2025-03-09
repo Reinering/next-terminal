@@ -35,6 +35,7 @@ const LoginForm = () => {
         sessionStorage.removeItem('current');
         sessionStorage.removeItem('openKeys');
         setToken(data['token']);
+        localStorage.setItem("isSync", "0");
 
         let user = data['info'];
         setCurrentUser(user);

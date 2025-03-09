@@ -1,4 +1,5 @@
 import {isEmpty} from "../utils/utils";
+import {encrypt, decrypt} from "./cryptoUtil";
 
 export function isAdmin() {
     let user = getCurrentUser();
@@ -9,7 +10,7 @@ export function setCurrentUser(user) {
     if (!user) {
         return
     }
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('user', encrypt(JSON.stringify(user)));
 }
 
 export function getCurrentUser() {
@@ -18,7 +19,7 @@ export function getCurrentUser() {
         return {};
     }
 
-    return JSON.parse(jsonStr);
+    return JSON.parse(decrypt(jsonStr));
 }
 
 export function hasMenu(...items) {

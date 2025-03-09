@@ -1,43 +1,65 @@
 import React, {useEffect, useState, lazy, Suspense} from 'react';
 import {
     Button,
-    Card,
-    Form,
     Input,
-    List,
     message,
     Modal,
-    notification,
-    Popconfirm,
-    Progress,
     Select,
-    Space,
-    Table,
-    Tooltip,
-    Typography
+    Space
 } from "antd";
-import { Scrollbars } from 'react-custom-scrollbars';
+const { TextArea } = Input;
+import {useSearchParams} from "react-router-dom";
+import userPrecmds from "../../api/user-precmds";
 // import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify';
+import { Scrollbars } from 'react-custom-scrollbars';
 import 'react-contexify/ReactContexify.css';
-
 import './commandBar.css';
 
 function CommandBar(props) {
     // const [api, contextHolder] = notification.useNotification();
     const [messageApi, contextHolder] = message.useMessage();
+    const [searchParams] = useSearchParams();
+    const assetId = searchParams.get('assetId');
 
     // 状态管理：工具选择和命令输入
     let [command, setCommand] = useState('');
-    const [cmds, setCmds] = useState({
-        "option1": [{"label":"label1", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}],
-        "option2": [{"label":"label2", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}],
-        "option3": [{"label":"label3", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}],
-        "option4": [{"label":"label4", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}, {"label":"label", "str":"cmd"}]
-    });
+    const [cmds, setCmds] = useState({})
 
     useEffect(() => {
+        let isSync = localStorage.getItem("isSync");
+        if (isSync === "0") {
+            localStorage.removeItem("precmds");
+            getPreCmds();
+        } else {
+            if (localStorage.getItem("precmds")) {
+                setCmds(JSON.parse(localStorage.getItem("precmds")));
+            } else {
+                getPreCmds();
+            }
+        }
+        localStorage.setItem("isSync", "1");
+    }, [assetId]);
 
-    });
+    const getPreCmds = () => {
+        userPrecmds.getUserPreCmds().then((data) => {
+            let tmp = {};
+            for (let d in data) {
+                let da = data[d]
+                let group = data[d]["group"]
+                if (da.hasOwnProperty("group")) {
+                    if (!tmp.hasOwnProperty(group)) {
+                        tmp[group] = [];
+                    }
+                    Reflect.deleteProperty(da,"group");
+                    if (da.hasOwnProperty("label") && da.hasOwnProperty("text")) {
+                        tmp[group].push(da);
+                    }
+                }
+            }
+            setCmds(tmp);
+            localStorage.setItem("precmds", JSON.stringify(tmp));
+        });
+    }
 
     // cmd bar选项（你可以根据需要扩展）
     const [option, setOption] = useState("");
@@ -55,7 +77,6 @@ function CommandBar(props) {
     // 处理发送命令（这里可以添加实际的发送逻辑）
     const handleSendCommand = () => {
         if (command.trim()) {
-            console.log(`Sending command: ${command} with tool`);
             // 这里可以添加实际的 API 调用或逻辑来发送命令
             props.send(command + "\n");
             setCommand(''); // 清空输入框
@@ -71,9 +92,7 @@ function CommandBar(props) {
             } else {
                 // 阻止默认行为（如换行）
                 event.preventDefault();
-
-                const command = event.target.value;
-                console.log("当前命令:", command);
+                // const command = event.target.value;
                 handleSendCommand();
             }
         }
@@ -81,7 +100,6 @@ function CommandBar(props) {
 
     // 获取当前选中的选项对应的命令列表
     const getCommandsForOption = () => {
-        console.log("mark", option, cmds[option])
         return cmds[option] || []; // 如果选择的工具不在 cmds 中，返回空数组
     };
 
@@ -151,7 +169,7 @@ function CommandBar(props) {
             if (item.id === 1) {
                 setEditButtonVisible(true);
                 setLabel1(selectedItem["label"]);
-                setSendStr1(selectedItem["str"]);
+                setSendStr1(selectedItem["text"]);
             } else if (item.id === 2) {
                 setDelButtonVisible(true);
             }
@@ -170,11 +188,22 @@ function CommandBar(props) {
     const handleAddButtonOk = () => {
         setAddButtonVisible(false);
         if (label.trim()) {
-            // 同步更新 cmds
-
-            const newCmds = {...cmds};
-            newCmds[option] = [...(newCmds[option] || []), {label: label, str: sendStr}];
-            setCmds(newCmds);
+            userPrecmds.addPreCmd({group: option, label: label, text: sendStr}).then((data) => {
+                if (data) {
+                    const newCmds = {...cmds};
+                    if (!newCmds.hasOwnProperty(option)) {
+                        newCmds[option] = [];
+                    }
+                    newCmds[option].push({group: option, label: label, text: sendStr});
+                    setCmds(newCmds);
+                    localStorage.setItem("precmds", JSON.stringify(newCmds));
+                    messageApi.success("添加成功！");
+                } else {
+                    messageApi.error("添加失败！");
+                }
+                setLabel('');
+                setSendStr('');
+            });
         } else {
             messageApi.error('Label 不能为空！')
         }
@@ -189,11 +218,25 @@ function CommandBar(props) {
     const handleEditButtonOk = () => {
         setEditButtonVisible(false);
         if (label1.trim()) {
-            // 同步更新 cmds
-            // if (selectedItem)
-            const newCmds = {...cmds};
-            newCmds[option] = [...(newCmds[option] || []), {label: label1, str: sendStr1}];
-            setCmds(newCmds);
+            userPrecmds.updatePreCmd(
+                {old: {"group": option, label: selectedItem["label"], text: selectedItem["text"]},
+                new: {"group": option, label: label1, text: sendStr1}}).then((data) => {
+                if (data) {
+                    const newCmds = {...cmds};
+                    newCmds[option] = newCmds[option].map((cmd) => {
+                        if (cmd["label"] === selectedItem["label"]) {
+                            cmd["label"] = label1;
+                            cmd["text"] = sendStr1;
+                        }
+                        return cmd;
+                    });
+                    setCmds(newCmds);
+                    localStorage.setItem("precmds", JSON.stringify(newCmds));
+                    messageApi.success("更新成功！");
+                } else {
+                    messageApi.error("更新失败！");
+                }
+            });
         } else {
             messageApi.error('Label 不能为空！')
         }
@@ -205,6 +248,19 @@ function CommandBar(props) {
     }
     const handleDelButtonOk = () => {
         setDelButtonVisible(false);
+        if (selectedItem) {
+            userPrecmds.deletePreCmd({group: option, label: selectedItem["label"], text: selectedItem["text"]}).then((data) => {
+                if (data) {
+                    const newCmds = {...cmds};
+                    newCmds[option] = newCmds[option].filter((cmd) => cmd["label"] !== selectedItem["label"]);
+                    setCmds(newCmds);
+                    localStorage.setItem("precmds", JSON.stringify(newCmds));
+                    messageApi.success("删除成功！");
+                } else {
+                    messageApi.error("删除失败！");
+                }
+            });
+        }
     }
     const handleDelButtonCancel = () => {
         setDelButtonVisible(false);
@@ -216,6 +272,8 @@ function CommandBar(props) {
             const newCmds = {...cmds};
             newCmds[labelBar] = [];
             setCmds(newCmds);
+            setOption(labelBar);
+            localStorage.setItem("precmds", JSON.stringify(newCmds));
         } else {
             messageApi.error('Label 不能为空！')
         }
@@ -228,9 +286,19 @@ function CommandBar(props) {
     const handleEditButtonBarOk = () => {
         setEditButtonBarVisible(false);
         if (labelBar1.trim()) {
-            const newCmds = {...cmds};
-            newCmds[labelBar] = [];
-            setCmds(newCmds);
+            userPrecmds.updatePreCmdGroup({old: option, new: labelBar1}).then((data) => {
+                if (data) {
+                    const newCmds = {...cmds};
+                    newCmds[labelBar1] = newCmds[option];
+                    Reflect.deleteProperty(newCmds, option);
+                    setOption(labelBar1);
+                    setCmds(newCmds);
+                    localStorage.setItem("precmds", JSON.stringify(newCmds));
+                    messageApi.success("更新成功！");
+                } else {
+                    messageApi.error("更新失败！");
+                }
+            });
         } else {
             messageApi.error('Label 不能为空！')
         }
@@ -239,16 +307,30 @@ function CommandBar(props) {
         setEditButtonBarVisible(false);
         setLabelBar1('');
     }
-
-    const onButtonClick = (cmd) => {
-        setCommand(command + cmd["str"]);
-    }
-
     const handleDelButtonBarOk = () => {
         setDelButtonBarVisible(false);
+        if (option) {
+            userPrecmds.deletePreCmdGroup({"group": option}).then((data) => {
+                if (data) {
+                    const newCmds = {...cmds};
+                    Reflect.deleteProperty(newCmds, option);
+                    setCmds(newCmds);
+                    localStorage.setItem("precmds", JSON.stringify(newCmds));
+                    messageApi.success("删除成功！");
+                    console.log("mark", Object.keys(newCmds))
+                    setOption(Object.keys(newCmds)[0]);
+                } else {
+                    messageApi.error("删除失败！");
+                }
+            });
+        }
     }
     const handleDelButtonBarCancel = () => {
         setDelButtonBarVisible(false);
+    }
+
+    const onButtonClick = (cmd) => {
+        setCommand(command + cmd["text"]);
     }
 
     return (
@@ -261,6 +343,7 @@ function CommandBar(props) {
                     <Scrollbars style={{minHeight: "50px", maxHeight: "150px" }}>
                         <Space wrap style={{margin_left: "3px", margin_right: "3px"}}>
                             <Select wrap
+                                    value={option}
                                     onChange={handleOptionChange}
                                     style={{
                                         width: "100px",
@@ -328,23 +411,23 @@ function CommandBar(props) {
             { /* 右键菜单样式 */}
             {option && (
                 <Modal title="Add Button"  open={addButtonVisible} onOk={handleAddButtonOk} onCancel={handleAddButtonCancel}>
-                    <Input addonBefore="Label" value={label} onChange={e => {setLabel(e.target.value)}}/>
-                    <Input addonBefore="Send String" value={sendStr} onChange={e => {setSendStr(e.target.value)}}/>
+                    <Input addonBefore="Label" value={label} maxLength={16} onChange={e => {setLabel(e.target.value)}}/>
+                    <Input addonBefore="Send String" autoSize value={sendStr} onChange={e => {setSendStr(e.target.value)}}/>
                 </Modal>
             )}
             <Modal title="Edit Button" open={editButtonVisible} onOk={handleEditButtonOk} onCancel={handleEditButtonCancel}>
-                <Input addonBefore="Label" value={label1} onChange={e => {setLabel1(e.target.value)}}/>
-                <Input addonBefore="Send String" value={sendStr1} onChange={e => {setSendStr1(e.target.value)}}/>
+                <Input addonBefore="Label" value={label1} maxLength={16} onChange={e => {setLabel1(e.target.value)}}/>
+                <Input addonBefore="Send String" autoSize value={sendStr1} onChange={e => {setSendStr1(e.target.value)}}/>
             </Modal>
             <Modal title="Delete Button" open={delButtonVisible} onOk={handleDelButtonOk} onCancel={handleDelButtonCancel}>
                 <p>Are you sure to delete this?</p>
             </Modal>
             <Modal title="Add Button Bar" open={addButtonBarVisible} onOk={handleAddButtonBarOk} onCancel={handleAddButtonBarCancel}>
-                <Input addonBefore="Label" value={labelBar} onChange={e => {setLabelBar(e.target.value)}}/>
+                <Input addonBefore="Label" value={labelBar} maxLength={16} onChange={e => {setLabelBar(e.target.value)}}/>
             </Modal>
             {option && (
                 <Modal title="Edit Button Bar" open={editButtonBarVisible} onOk={handleEditButtonBarOk} onCancel={handleEditButtonBarCancel}>
-                    <Input addonBefore="Label" value={labelBar1} onChange={e => {setLabelBar1(e.target.value)}}/>
+                    <Input addonBefore="Label" value={labelBar1} maxLength={16} onChange={e => {setLabelBar1(e.target.value)}}/>
                 </Modal>
             )}
             {option && (
