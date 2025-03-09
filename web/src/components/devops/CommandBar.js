@@ -121,7 +121,7 @@ function CommandBar(props) {
         ],
     };
     const handleContextMenu = (e, itemId, type) => {
-        console.log(`右键点击了 ${type} ${itemId}`)
+        // console.log(`右键点击了 ${type} ${itemId}`)
         e.preventDefault();
         e.stopPropagation(); // 阻止事件冒泡到父级
 
@@ -151,7 +151,7 @@ function CommandBar(props) {
     }, []);
 
     const handleMenuItemClick = (item) => {
-        console.log(`点击了 ${item.label} 于控件 ${selectedItem} (类型: ${menuType})`);
+        // console.log(`点击了 ${item.label} 于控件 ${selectedItem} (类型: ${menuType})`);
         setMenuVisible(false);
 
         if (menuType === 'select') {
@@ -316,9 +316,8 @@ function CommandBar(props) {
                     Reflect.deleteProperty(newCmds, option);
                     setCmds(newCmds);
                     localStorage.setItem("precmds", JSON.stringify(newCmds));
-                    messageApi.success("删除成功！");
-                    console.log("mark", Object.keys(newCmds))
                     setOption(Object.keys(newCmds)[0]);
+                    messageApi.success("删除成功！");
                 } else {
                     messageApi.error("删除失败！");
                 }
