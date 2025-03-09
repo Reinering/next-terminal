@@ -71,6 +71,7 @@ func setupRoutes() *echo.Echo {
 	webTerminalApi := new(api.WebTerminalApi)
 	UserApi := new(api.UserApi)
 	UserGroupApi := new(api.UserGroupApi)
+	userPreCmdsApi := new(api.UserPreCmdsApi)
 	AssetApi := new(api.AssetApi)
 	CommandApi := new(api.CommandApi)
 	CredentialApi := new(api.CredentialApi)
@@ -148,6 +149,16 @@ func setupRoutes() *echo.Echo {
 		userGroups.PUT("/:id", UserGroupApi.UserGroupUpdateEndpoint)
 		userGroups.DELETE("/:id", UserGroupApi.UserGroupDeleteEndpoint)
 		userGroups.GET("/:id", UserGroupApi.UserGroupGetEndpoint)
+	}
+
+	userPreCmds := e.Group("/precmd")
+	{
+		userPreCmds.GET("", userPreCmdsApi.GetEndpoint)
+		userPreCmds.POST("", userPreCmdsApi.AddEndpoint)
+		userPreCmds.PUT("", userPreCmdsApi.UpdateEndpoint)
+		userPreCmds.POST("/del", userPreCmdsApi.DeleteEndpoint)
+		userPreCmds.PUT("/group", userPreCmdsApi.UpdateGroupEndpoint)
+		userPreCmds.POST("/group/del", userPreCmdsApi.DeleteGroupEndpoint)
 	}
 
 	assets := e.Group("/assets", mw.Admin)

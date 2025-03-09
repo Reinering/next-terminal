@@ -31,6 +31,10 @@ var allowUrls = []urlpath.Path{
 	urlpath.New("/sessions/:id/rm"),
 	urlpath.New("/sessions/:id/rename"),
 	urlpath.New("/sessions/:id/ssh"),
+	urlpath.New("/precmd"),
+	urlpath.New("/precmd/del"),
+	urlpath.New("/precmd/group"),
+	urlpath.New("/precmd/group/del"),
 }
 
 func Auth(next echo.HandlerFunc) echo.HandlerFunc {
