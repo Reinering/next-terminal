@@ -379,7 +379,7 @@ function CommandBar(props) {
                         value={command}
                         onChange={handleCommandChange}
                         onKeyDown={handleKeyDown}
-                        placeholder="Send commands to active session"
+                        placeholder="Send commands to active session, press Shift + Enter to send."
                         className="command-textarea"
                     />
                 </div>
