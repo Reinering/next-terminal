@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import zhCN from 'antd/es/locale-provider/zh_CN';
+import zhCN from 'antd/locale/zh_CN';
 import {ConfigProvider} from 'antd';
 import {HashRouter as Router} from "react-router-dom";
 import dayjs from "dayjs";
