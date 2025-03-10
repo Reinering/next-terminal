@@ -14,7 +14,7 @@ import userPrecmds from "../../api/user-precmds";
 // import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify';
 import { Scrollbars } from 'react-custom-scrollbars';
 import 'react-contexify/ReactContexify.css';
-import './commandBar.css';
+import './CommandBar.css';
 
 function CommandBar(props) {
     // const [api, contextHolder] = notification.useNotification();
