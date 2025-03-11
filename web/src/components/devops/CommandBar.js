@@ -4,8 +4,10 @@ import {
     Input,
     message,
     Modal,
+    Tooltip,
     Select,
     Space,
+    Flex,
     Typography
 } from "antd";
 const { TextArea } = Input;
@@ -171,6 +173,7 @@ function CommandBar(props) {
                 setEditButtonVisible(true);
                 setLabel1(selectedItem["label"]);
                 setSendStr1(selectedItem["text"]);
+                setMarkStr1(selectedItem["mark"]);
             } else if (item.id === 2) {
                 setDelButtonVisible(true);
             }
@@ -186,16 +189,17 @@ function CommandBar(props) {
 
     const [label, setLabel] = useState('');
     const [sendStr, setSendStr] = useState('');
+    const [markStr, setMarkStr] = useState('');
     const handleAddButtonOk = () => {
         setAddButtonVisible(false);
         if (label.trim()) {
-            userPrecmds.addPreCmd({group: option, label: label, text: sendStr}).then((data) => {
+            userPrecmds.addPreCmd({group: option, label: label, text: sendStr, mark: markStr}).then((data) => {
                 if (data) {
                     const newCmds = {...cmds};
                     if (!newCmds.hasOwnProperty(option)) {
                         newCmds[option] = [];
                     }
-                    newCmds[option].push({group: option, label: label, text: sendStr});
+                    newCmds[option].push({group: option, label: label, text: sendStr, mark: markStr});
                     setCmds(newCmds);
                     localStorage.setItem("precmds", JSON.stringify(newCmds));
                     messageApi.success("添加成功！");
@@ -204,6 +208,7 @@ function CommandBar(props) {
                 }
                 setLabel('');
                 setSendStr('');
+                setMarkStr('');
             });
         } else {
             messageApi.error('Label 不能为空！')
@@ -213,21 +218,24 @@ function CommandBar(props) {
         setAddButtonVisible(false);
         setLabel('');
         setSendStr('');
+        setMarkStr('');
     }
     const [label1, setLabel1] = useState('');
     const [sendStr1, setSendStr1] = useState('');
+    const [markStr1, setMarkStr1] = useState('');
     const handleEditButtonOk = () => {
         setEditButtonVisible(false);
         if (label1.trim()) {
             userPrecmds.updatePreCmd(
-                {old: {"group": option, label: selectedItem["label"], text: selectedItem["text"]},
-                new: {"group": option, label: label1, text: sendStr1}}).then((data) => {
+                {old: {"group": option, label: selectedItem["label"], text: selectedItem["text"], mark: selectedItem["mark"]},
+                new: {"group": option, label: label1, text: sendStr1, mark: markStr1}}).then((data) => {
                 if (data) {
                     const newCmds = {...cmds};
                     newCmds[option] = newCmds[option].map((cmd) => {
                         if (cmd["label"] === selectedItem["label"]) {
                             cmd["label"] = label1;
                             cmd["text"] = sendStr1;
+                            cmd["mark"] = markStr1;
                         }
                         return cmd;
                     });
@@ -246,6 +254,7 @@ function CommandBar(props) {
         setEditButtonVisible(false);
         setLabel1('');
         setSendStr1('');
+        setMarkStr1('');
     }
     const handleDelButtonOk = () => {
         setDelButtonVisible(false);
@@ -357,17 +366,16 @@ function CommandBar(props) {
                                 ))}
                             </Select>
                             {getCommandsForOption().map((cmd) => (
-                                <Button
-                                    onContextMenu={(e) => handleContextMenu(e, cmd, 'button')}
-                                    onClick={() => {onButtonClick(cmd)}}
-                                    key={cmd["label"]}
-                                    style={{
-                                        width: "100px",
-                                        border_radius: "5px"
-                                    }}
-                                >
-                                    {cmd["label"]}
-                                </Button>
+                                <Tooltip title={cmd["label"]}>
+                                    <Button
+                                        className="long-text-btn"
+                                        onContextMenu={(e) => handleContextMenu(e, cmd, 'button')}
+                                        onClick={() => {onButtonClick(cmd)}}
+                                        key={cmd["label"]}
+                                    >
+                                        {cmd["label"]}
+                                    </Button>
+                                </Tooltip>
                             ))}
                         </Space>
                     </Scrollbars>
@@ -415,6 +423,8 @@ function CommandBar(props) {
                     <Input value={label} maxLength={16} onChange={e => {console.log("mark", e); setLabel(e.target.value)}}/>
                     <Typography.Title level={5}>Send String</Typography.Title>
                     <TextArea autoSize value={sendStr} onChange={e => {setSendStr(e.target.value)}}/>
+                    <Typography.Title level={5}>Mark</Typography.Title>
+                    <TextArea autoSize value={markStr} onChange={e => {setMarkStr(e.target.value)}}/>
                 </Modal>
             )}
             <Modal title="Edit Button" open={editButtonVisible} onOk={handleEditButtonOk} onCancel={handleEditButtonCancel}>
@@ -422,6 +432,8 @@ function CommandBar(props) {
                 <Input value={label1} maxLength={16} onChange={e => {setLabel1(e.target.value)}}/>
                 <Typography.Title level={5}>Send String</Typography.Title>
                 <TextArea autoSize value={sendStr1} onChange={e => {setSendStr1(e.target.value)}}/>
+                <Typography.Title level={5}>Mark</Typography.Title>
+                <TextArea autoSize value={markStr1} onChange={e => {setMarkStr1(e.target.value)}}/>
             </Modal>
             <Modal title="Delete Button" open={delButtonVisible} onOk={handleDelButtonOk} onCancel={handleDelButtonCancel}>
                 <p>Are you sure to delete this?</p>

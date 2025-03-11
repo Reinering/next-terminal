@@ -55,9 +55,20 @@
     min-width: 150px;
 }
 
+.long-text-btn {
+    display: inline-block; /* 确保按钮是块级或内联块元素 */
+    max-width: 100px !important; /* 明确限制宽度 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 5px 10px; /* 可选：调整内边距 */
+    border: 1px solid #ccc; /* 可选：确保按钮有边界 */
+}
+
 .menu-item {
     padding: 8px 16px;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .menu-item:hover {

@@ -30,6 +30,7 @@ func trimUserPreCmds(cmds []model.UserPreCmds) []model.PreCmd {
 			Group: cmd.Group,
 			Label: cmd.Label,
 			Text:  cmd.Text,
+			Mark:  cmd.Mark,
 		}
 	}
 	return result
@@ -42,6 +43,7 @@ func (service userPreCmdsService) Add(ctx context.Context, id string, item model
 		Group:   item.Group,
 		Label:   item.Label,
 		Text:    item.Text,
+		Mark:    item.Mark,
 		Created: common.NewJsonTime(time.Now()),
 	}
 
@@ -60,6 +62,7 @@ func (service userPreCmdsService) Update(ctx context.Context, id string, items m
 		Group:   items.New.Group,
 		Label:   items.New.Label,
 		Text:    items.New.Text,
+		Mark:    items.New.Mark,
 		Created: common.NewJsonTime(time.Now()),
 	}
 
@@ -78,6 +81,7 @@ func (service userPreCmdsService) Delete(ctx context.Context, id string, item mo
 		Group:   item.Group,
 		Label:   item.Label,
 		Text:    item.Text,
+		Mark:    item.Mark,
 		Created: common.NewJsonTime(time.Now()),
 	}
 

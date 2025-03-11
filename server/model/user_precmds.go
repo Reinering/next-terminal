@@ -7,6 +7,7 @@ type UserPreCmds struct {
 	Group   string          `json:"group"`
 	Label   string          `json:"label"`
 	Text    string          `json:"text"`
+	Mark    string          `json:"mark"`
 	Created common.JsonTime `json:"created"`
 }
 
@@ -18,6 +19,7 @@ type PreCmd struct {
 	Group string `json:"group"`
 	Label string `json:"label"`
 	Text  string `json:"text"`
+	Mark  string `json:"mark"`
 }
 
 type PreCmds struct {

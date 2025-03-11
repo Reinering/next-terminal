@@ -26,11 +26,11 @@ func (r userPreCmdsRepository) Create(c context.Context, o model.UserPreCmds) (e
 }
 
 func (r userPreCmdsRepository) Update(c context.Context, id string, old model.PreCmd, item model.UserPreCmds) (err error) {
-	return r.GetDB(c).Where("id = ? and `group` = ? and label = ? and text = ?", id, old.Group, old.Label, old.Text).Updates(item).Error
+	return r.GetDB(c).Where("id = ? and `group` = ? and label = ? and text = ? and mark = ?", id, old.Group, old.Label, old.Text, old.Mark).Updates(item).Error
 }
 
 func (r userPreCmdsRepository) Delete(c context.Context, item model.UserPreCmds) (err error) {
-	return r.GetDB(c).Where("id = ? and `group` = ? and label = ? and text = ?", item.ID, item.Group, item.Label, item.Text).Delete(&model.UserPreCmds{}).Error
+	return r.GetDB(c).Where("id = ? and `group` = ? and label = ? and text = ? and mark = ?", item.ID, item.Group, item.Label, item.Text, item.Mark).Delete(&model.UserPreCmds{}).Error
 }
 
 func (r userPreCmdsRepository) UpdateGroup(c context.Context, id string, old string, newstr string) (err error) {
