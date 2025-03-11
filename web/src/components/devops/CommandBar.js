@@ -1,6 +1,7 @@
 import React, {useEffect, useState, lazy, Suspense} from 'react';
 import {
     Button,
+    Checkbox,
     Input,
     message,
     Modal,
@@ -81,7 +82,11 @@ function CommandBar(props) {
     const handleSendCommand = () => {
         if (command.trim()) {
             // 这里可以添加实际的 API 调用或逻辑来发送命令
-            props.send(command + "\n");
+            if (isSudo) {
+                props.send("sudo " + command + "\n");
+            } else {
+                props.send(command + "\n");
+            }
             setCommand(''); // 清空输入框
         }
     };
@@ -341,6 +346,10 @@ function CommandBar(props) {
     const onButtonClick = (cmd) => {
         setCommand(command + cmd["text"]);
     }
+    const [isSudo, setisSudo] = useState(false);
+    const onChangeSudo = (e) => {
+        setisSudo(e.target.checked);
+    }
 
     return (
         <>
@@ -351,6 +360,7 @@ function CommandBar(props) {
                 >
                     <Scrollbars style={{minHeight: "50px", maxHeight: "150px" }}>
                         <Space wrap style={{margin_left: "3px", margin_right: "3px"}}>
+                            <Checkbox onChange={onChangeSudo}>sudo</Checkbox>
                             <Select wrap
                                     value={option}
                                     onChange={handleOptionChange}
