@@ -2,6 +2,8 @@ import React, {useEffect, useState, lazy, Suspense} from 'react';
 import {
     Button,
     Checkbox,
+    Divider,
+    Drawer,
     Input,
     message,
     Modal,
@@ -16,6 +18,7 @@ import {useSearchParams} from "react-router-dom";
 import userPrecmds from "../../api/user-precmds";
 // import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify';
 import { Scrollbars } from 'react-custom-scrollbars';
+import { SettingOutlined } from '@ant-design/icons';
 import 'react-contexify/ReactContexify.css';
 import './CommandBar.css';
 
@@ -42,6 +45,11 @@ function CommandBar(props) {
             }
         }
         localStorage.setItem("isSync", "1");
+
+        sessionStorage.getItem("option") ? setOption(sessionStorage.getItem("option")) : setOption(Object.keys(cmds)[0]);
+        sessionStorage.getItem("isSudo") ? setIsSudo(sessionStorage.getItem("isSudo")) : setIsSudo(false);
+        sessionStorage.getItem("isSendNow") ? setSendNow(sessionStorage.getItem("isSendNow")) : setSendNow(false);
+
     }, [assetId]);
 
     const getPreCmds = () => {
@@ -69,6 +77,7 @@ function CommandBar(props) {
     const [option, setOption] = useState("");
     const handleOptionChange = (value) => {
         setOption(value);
+        sessionStorage.setItem("option", value);
         setAddButtonVisible(false);
         setEditButtonBarVisible(false);
         setDelButtonBarVisible(false);
@@ -288,6 +297,7 @@ function CommandBar(props) {
             newCmds[labelBar] = [];
             setCmds(newCmds);
             setOption(labelBar);
+            sessionStorage.setItem("option", labelBar);
             localStorage.setItem("precmds", JSON.stringify(newCmds));
         } else {
             messageApi.error('Label 不能为空！')
@@ -307,6 +317,7 @@ function CommandBar(props) {
                     newCmds[labelBar1] = newCmds[option];
                     Reflect.deleteProperty(newCmds, option);
                     setOption(labelBar1);
+                    sessionStorage.setItem("option", labelBar1);
                     setCmds(newCmds);
                     localStorage.setItem("precmds", JSON.stringify(newCmds));
                     messageApi.success("更新成功！");
@@ -332,6 +343,7 @@ function CommandBar(props) {
                     setCmds(newCmds);
                     localStorage.setItem("precmds", JSON.stringify(newCmds));
                     setOption(Object.keys(newCmds)[0]);
+                    sessionStorage.setItem("option", Object.keys(newCmds)[0]);
                     messageApi.success("删除成功！");
                 } else {
                     messageApi.error("删除失败！");
@@ -343,12 +355,34 @@ function CommandBar(props) {
         setDelButtonBarVisible(false);
     }
 
-    const onButtonClick = (cmd) => {
-        setCommand(command + cmd["text"]);
+    const [isShowSettings, setIsShowSettings] = useState(false);
+    const onSettingsOpen = () => {
+        setIsShowSettings(true)
     }
-    const [isSudo, setisSudo] = useState(false);
+    const onSettingsClose = () => {
+        setIsShowSettings(false);
+    }
+    const [isSudo, setIsSudo] = useState(false);
     const onChangeSudo = (e) => {
-        setisSudo(e.target.checked);
+        setIsSudo(e.target.checked);
+        sessionStorage.setItem("isSudo", e.target.checked);
+    }
+    const [isSendNow, setSendNow] = useState(false);
+    const onChangeSendNow = (e) => {
+        setSendNow(e.target.checked);
+        sessionStorage.setItem("isSendNow", e.target.checked);
+    }
+
+    const onButtonClick = (cmd) => {
+        if (isSendNow) {
+            if (isSudo) {
+                props.send("sudo " + cmd["text"] + "\n");
+            } else {
+                props.send(cmd["text"] + "\n");
+            }
+        } else {
+            setCommand(command + cmd["text"]);
+        }
     }
 
     return (
@@ -360,7 +394,7 @@ function CommandBar(props) {
                 >
                     <Scrollbars style={{minHeight: "50px", maxHeight: "150px" }}>
                         <Space wrap style={{margin_left: "3px", margin_right: "3px"}}>
-                            <Checkbox onChange={onChangeSudo}>sudo</Checkbox>
+                            <Button type="primary" shape="circle" icon={<SettingOutlined />} onClick={onSettingsOpen}/>
                             <Select wrap
                                     value={option}
                                     onChange={handleOptionChange}
@@ -402,6 +436,12 @@ function CommandBar(props) {
                     />
                 </div>
             </div>
+
+            <Drawer title="Settings" onClose={onSettingsClose} open={isShowSettings}>
+                <Checkbox defaultChecked={isSudo} onChange={onChangeSudo}>sudo(enable)</Checkbox>
+                <Checkbox defaultChecked={isSendNow} onChange={onChangeSendNow}>Send now</Checkbox>
+                <Divider />
+            </Drawer>
 
             {/* 右键菜单 */}
             {menuVisible && (
