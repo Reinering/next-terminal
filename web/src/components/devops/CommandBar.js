@@ -299,6 +299,8 @@ function CommandBar(props) {
             setOption(labelBar);
             sessionStorage.setItem("option", labelBar);
             localStorage.setItem("precmds", JSON.stringify(newCmds));
+            setLabelBar('');
+            messageApi.success("添加成功！");
         } else {
             messageApi.error('Label 不能为空！')
         }
