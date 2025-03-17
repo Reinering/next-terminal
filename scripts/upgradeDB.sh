@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS "user_precmds" (
   "\`group\`" text NOT NULL,
   "label" text NOT NULL,
   "text" text,
+  "mark" text,
   "created" datetime NOT NULL
 );
 "
