@@ -15,7 +15,7 @@
     "dayjs": "1.11.2",
     "guacamole-common-js": "1.4.0-a",
     "js-base64": "3.7.2",
-    "monaco-editor": "^0.34.1",
+    "monaco-editor": "0.52.2",
     "monaco-editor-webpack-plugin": "^7.0.1",
     "qs": "6.10.3",
     "react": "^18.2.0",
