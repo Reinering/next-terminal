@@ -12,7 +12,7 @@ import Draggable from "react-draggable";
 import {CodeOutlined, FolderOutlined, LineChartOutlined, MacCommandOutlined} from "@ant-design/icons";
 import FileSystem from "../devops/FileSystem";
 import CommandBar from "../devops/CommandBar";
-import "xterm/css/xterm.css"
+import "xterm/css/xterm.css";
 import Stats from "./Stats";
 import {debounce} from "../../utils/fun";
 import commandApi from "../../api/command";
